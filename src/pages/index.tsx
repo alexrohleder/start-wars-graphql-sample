@@ -7,7 +7,7 @@ type Props = {
 };
 
 const Home: NextPage<Props> = (props) => {
-  return <pre className="bg-red-100">{JSON.stringify(props, null, 4)}</pre>;
+  return <pre className="bg-green-100">{JSON.stringify(props, null, 4)}</pre>;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
