@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import { gql } from "@apollo/client";
 import client from "../lib/apollo-client";
 
@@ -7,16 +7,24 @@ type Props = {
 };
 
 const Home: NextPage<Props> = (props) => {
-  return (
-    <pre className="bg-red-100">{JSON.stringify(props.allPeople, null, 4)}</pre>
-  );
+  return <pre className="bg-red-100">{JSON.stringify(props, null, 4)}</pre>;
 };
 
-export async function getStaticProps() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  let first = 5;
+
+  if (context.query.first) {
+    if (typeof context.query.first === "string") {
+      first = parseInt(context.query.first, 10);
+    } else {
+      // Wrong parameters
+    }
+  }
+
   const { data } = await client.query({
     query: gql`
-      {
-        allPeople(first: 5) {
+      query AllPeople($first: Int, $after: String) {
+        allPeople(first: $first, after: $after) {
           edges {
             node {
               name
@@ -39,13 +47,18 @@ export async function getStaticProps() {
         }
       }
     `,
+    variables: {
+      first,
+      after: context.query.after,
+    },
   });
 
   return {
     props: {
+      query: context.query,
       allPeople: data.allPeople,
     },
   };
-}
+};
 
 export default Home;
